@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Push Test</title>
+</head>
+<body>
+  <h1>Notificações Web Push</h1>
+  <button id="subscribe">Permitir Notificações</button>
+  <script>
+    const publicVapidKey = 'BFebNtKMzMe8ajlU-6QkHFyGv0lP2WVY9mVs6TEI6YZyv7p8gImRwXrbMn1XVdemkGkjOlJPktngWBbBhfrdSJk';
+
+    document.getElementById('subscribe').addEventListener('click', async () => {
+      if ('serviceWorker' in navigator) {
+
+        const register = await navigator.serviceWorker.register('sw.js', {
+          scope: '/'
+        });
+
+        const subscription = await register.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+
+        await fetch('/subscribe', {
+          method: 'POST',
+          body: JSON.stringify(subscription), headers: { 'Content-Type': 'application/json' }
+        });
+
+        alert('Inscrição feita com sucesso!');
+      }
+    });
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
+    }
+  </script>
+</body>
+</html>
